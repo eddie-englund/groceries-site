@@ -58,16 +58,14 @@ export const validateSession = () =>
     ),
     TE.bind('sessionValidity', ({ sessionHeader }) =>
       TE.tryCatch(
-        async () => {
-          console.log(sessionHeader);
-          return await axios.post<ZodDefaultResponseT>(
+        async () =>
+          await axios.post<ZodDefaultResponseT>(
             `${Config.BaseURL}/validate-session`,
             {},
             {
               headers: { ...sessionHeader },
             },
-          );
-        },
+          ),
         (reason) => new InvalidSessionError(reason),
       ),
     ),

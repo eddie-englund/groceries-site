@@ -3,11 +3,18 @@ import { z } from 'zod';
 export const Stores = z.enum(['willys', 'coop', 'martin & servera', 'hemköp', 'öob']);
 
 export const ListItem = z.object({
-  id: z.string().uuid(),
   name: z.string().trim().min(1).max(64),
   description: z.optional(z.string().trim().min(1).max(256)),
   price: z.optional(z.number().min(1).max(1024)),
   store: z.optional(Stores),
+});
+
+export const List = z.object({
+  id: z.string().uuid(),
+  createdAt: z.string(),
+  name: z.string(),
+  store: z.optional(Stores),
+  items: z.array(ListItem),
 });
 
 export const StatusResponses = z.enum(['Success', 'Failure']);

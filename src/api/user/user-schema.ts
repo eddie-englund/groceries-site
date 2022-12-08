@@ -1,13 +1,14 @@
+import { ZodDefaultResponse } from './../gloabal-types';
+import { Lists } from './../../stores/list-store';
 import { z } from 'zod';
-import { ListItem, Stores } from '../gloabal-types';
 
-export const UserSchema = z.object({
-  username: z.string(),
-  lists: z.array(
-    z.object({
-      name: z.string(),
-      store: z.optional(Stores),
-      items: z.array(ListItem),
-    }),
-  ),
-});
+export const UserSchema = z
+  .object({
+    data: z.array(
+      z.object({
+        username: z.string(),
+        lists: Lists,
+      }),
+    ),
+  })
+  .merge(ZodDefaultResponse);

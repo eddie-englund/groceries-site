@@ -8,13 +8,13 @@ import buttonComponent from '@/components/button-component.vue';
 import { emailSchema, passwordSchema, login } from '@/api/auth/index';
 import type { z } from 'zod';
 import { saveRefreshToken, saveSessionToken } from '@/util/jwt-utils';
+import { useRouter } from 'vue-router';
 
 const loginState = loginStore();
+const router = useRouter();
 
 const handleSubmit = async () => {
-  console.log('b4 check');
   if (!loginState.email.valid || !loginState.password.valid) return;
-  console.log('before call');
   loginState.loading = true;
   await pipe(
     login({
@@ -22,19 +22,17 @@ const handleSubmit = async () => {
       password: loginState.password.value,
     }),
     TE.map((res) => {
-      console.log(res);
       loginState.success = true;
       loginState.error = undefined;
       saveSessionToken(res.data.sessionToken);
       saveRefreshToken(res.data.refreshToken);
+      router.push('/');
     }),
     TE.mapLeft((err) => {
-      console.error(err);
       loginState.success = false;
       loginState.error = err;
     }),
   )();
-  console.log('after call');
   loginState.loading = false;
 };
 
