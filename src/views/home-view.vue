@@ -5,7 +5,9 @@ import { onMounted } from 'vue';
 import { getAllUsers } from '@/api/user';
 import { pipe } from 'fp-ts/lib/function';
 import * as TE from 'fp-ts/TaskEither';
+import { useRouter } from 'vue-router';
 
+const router = useRouter();
 const listState = listStore();
 
 onMounted(async () => {
@@ -20,21 +22,29 @@ onMounted(async () => {
     TE.map((res) => (listState.allLists = res)),
     TE.mapLeft((left) => console.error(left)),
   )();
+
+  console.log(listState.allLists);
 });
+
+const handleListClick = (id: string) => {
+  listState.setSelectedList(id);
+  router.push(`/list`);
+};
 </script>
 
 <template>
-  <div class="home-view-container">
-    <h3>Recent grocery lists</h3>
+  <main class="home-view-container">
+    <h2>Recent grocery lists</h2>
     <div class="list-items-container">
       <list-item-component
         v-for="list in listState.allLists"
         :key="list.id"
         :name="list.name"
         :date="list.createdAt"
+        @click.prevent="handleListClick(list.id)"
       />
     </div>
-  </div>
+  </main>
 </template>
 
 <style lang="scss" scoped>
@@ -48,7 +58,7 @@ onMounted(async () => {
     display: flex;
     flex-direction: column;
     gap: 1rem;
-    width: 85%;
+    width: 65%;
     margin-top: 25%;
   }
 }

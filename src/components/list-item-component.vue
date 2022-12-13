@@ -3,14 +3,17 @@ import { DateTime } from 'luxon';
 
 defineProps({
   name: String,
-  date: { type: String, required: true },
+  date: String,
+  meta: String,
 });
 </script>
 
 <template>
-  <div class="list-item-container">
+  <div class="list-item-container" v-if="date || meta">
     <p class="list-name">{{ name }}</p>
-    <p class="list-date">{{ DateTime.fromISO(date).toLocaleString() }}</p>
+    <p class="list-date">
+      {{ date ? DateTime.fromISO(date).toLocaleString() : meta }}
+    </p>
   </div>
 </template>
 
@@ -29,6 +32,10 @@ defineProps({
     margin-top: 0.5rem;
     margin-bottom: 0.5rem;
     font-size: 1.1em;
+  }
+
+  .list-name {
+    text-transform: capitalize;
   }
 
   .list-date {

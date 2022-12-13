@@ -17,18 +17,23 @@ const handleSubmit = async () => {
   if (!loginState.email.valid || !loginState.password.valid) return;
   loginState.loading = true;
   await pipe(
-    login({
-      email: loginState.email.value,
-      password: loginState.password.value,
-    }),
-    TE.map((res) => {
+    TE.Do,
+    TE.bind('login', () =>
+      login({
+        email: loginState.email.value,
+        password: loginState.password.value,
+      }),
+    ),
+    TE.bind('refreshToken', ({ login }) => saveRefreshToken(login.data.refreshToken)),
+    TE.map(({ login }) => {
+      console.log('success, logged in.');
       loginState.success = true;
       loginState.error = undefined;
-      saveSessionToken(res.data.sessionToken);
-      saveRefreshToken(res.data.refreshToken);
+      saveSessionToken(login.data.sessionToken);
       router.push('/');
     }),
     TE.mapLeft((err) => {
+      console.error('left', err);
       loginState.success = false;
       loginState.error = err;
     }),
@@ -36,11 +41,7 @@ const handleSubmit = async () => {
   loginState.loading = false;
 };
 
-const validateString = async (
-  value: z.infer<typeof emailSchema>,
-  validator: z.ZodString,
-  key: 'email' | 'password',
-) => {
+const validateString = async (value: string, validator: z.ZodString, key: 'email' | 'password') => {
   await pipe(
     validateSafeT(value, validator),
     TE.mapLeft(() => (loginState[key].valid = false)),

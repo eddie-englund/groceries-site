@@ -26,7 +26,10 @@ export const LoginResponseSchema = z
 
 type LoginSchemaT = z.infer<typeof loginSchema>;
 
-export const login = ({ email, password }: LoginSchemaT) =>
+export const login = ({
+  email,
+  password,
+}: LoginSchemaT): TE.TaskEither<Error, z.infer<typeof LoginResponseSchema>> =>
   pipe(
     TE.Do,
     TE.bind('data', () => validateSafeT({ email, password }, loginSchema)),
@@ -39,6 +42,7 @@ export const login = ({ email, password }: LoginSchemaT) =>
     ),
     TE.bindW('validate', ({ login }) => validateSafeT(login.data, LoginResponseSchema)),
     TE.map(({ validate }) => validate),
+    TE.mapLeft((res) => new Error(`Failed to login, got error ${res}`)),
   );
 
 export class InvalidSessionError extends Error {

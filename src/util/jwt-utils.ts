@@ -25,8 +25,22 @@ export const constructSessionHeader = () =>
   );
 
 export const saveRefreshToken = (token: string): TE.TaskEither<RefreshCookieError, string> =>
-  TE.fromNullable(new RefreshCookieError('Failed to save refresh token cookie'))(
-    Cookies.set(RefreshTokenKey, token),
+  pipe(
+    TE.Do,
+    TE.bind('save', () =>
+      TE.tryCatch(
+        async () => Cookies.set(RefreshTokenKey, token, { expires: 7 }),
+        (reason) =>
+          new RefreshCookieError(`Failed to save refresh token cookie got error ${reason}`),
+      ),
+    ),
+    TE.bind('validate', ({ save }) =>
+      TE.fromNullable(
+        new RefreshCookieError(`Refresh token return value was null when setting it`),
+      )(save),
+    ),
+    TE.map(({ validate }) => validate),
+    TE.mapLeft((res) => res),
   );
 
 export const getRefreshToken = (): O.Option<string> => O.fromNullable(Cookies.get(RefreshTokenKey));
